@@ -1,0 +1,39 @@
+# Run this command to generate launcher icons:
+# flutter pub run flutter_launcher_icons:main
+
+flutter_launcher_icons:
+  image_path: "assets/icon/icon.png"
+
+  # Android
+  android: true
+  min_sdk_android: 21
+  # Optional: adaptive icon (foreground & background)
+  # adaptive_icon_background: "assets/icon/background.png"
+  # adaptive_icon_foreground: "assets/icon/foreground.png"
+  # adaptive_icon_monochrome: "assets/icon/monochrome.png"
+
+  # iOS
+  ios: true
+  image_path_ios: "assets/icon/icon.png"
+  remove_alpha_ios: true
+  # Optional iOS configs:
+  # background_color_ios: "#ffffff"
+  # image_path_ios_dark_transparent: "assets/icon/icon_dark.png"
+
+  # Web
+  web:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    background_color: "#ffffff"
+    theme_color: "#0000ff"
+
+  # Windows
+  windows:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    icon_size: 256 # Recommended: 256 (min 48, max 256)
+
+  # macOS
+  macos:
+    generate: true
+    image_path: "assets/icon/icon.png"
