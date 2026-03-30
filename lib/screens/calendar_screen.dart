@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:my_first_app/theme/app_theme.dart';
 import '../providers/app_provider.dart';
+import '../models/task_model.dart';
 import 'package:intl/intl.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -16,8 +17,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedMonth = DateTime.now();
 
   static const List<String> _months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   List<DateTime> _daysInMonth(DateTime month) {
@@ -26,8 +37,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final leading = first.weekday % 7;
     return [
       ...List.generate(
-          leading, (i) => first.subtract(Duration(days: leading - i))),
-      ...List.generate(last.day, (i) => DateTime(month.year, month.month, i + 1)),
+        leading,
+        (i) => first.subtract(Duration(days: leading - i)),
+      ),
+      ...List.generate(
+        last.day,
+        (i) => DateTime(month.year, month.month, i + 1),
+      ),
     ];
   }
 
@@ -40,163 +56,190 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Container(
       color: colors.background,
       child: Column(
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              child: Row(
-                children: [
-                  Text('Calendar',
-                      style: Theme.of(context).textTheme.displaySmall),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => setState(() {
-                      _focusedMonth = DateTime(
-                          _focusedMonth.year, _focusedMonth.month - 1);
-                    }),
-                    child: Icon(Icons.chevron_left_rounded,
-                        color: colors.textSecondary),
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+            child: Row(
+              children: [
+                Text(
+                  'Calendar',
+                  style: Theme.of(context).textTheme.displaySmall,
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => setState(() {
+                    _focusedMonth = DateTime(
+                      _focusedMonth.year,
+                      _focusedMonth.month - 1,
+                    );
+                  }),
+                  child: Icon(
+                    Icons.chevron_left_rounded,
+                    color: colors.textSecondary,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      '${_months[_focusedMonth.month - 1]} ${_focusedMonth.year}',
-                      style: TextStyle(
-                          color: colors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    '${_months[_focusedMonth.month - 1]} ${_focusedMonth.year}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: colors.textPrimary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => setState(() {
-                      _focusedMonth = DateTime(
-                          _focusedMonth.year, _focusedMonth.month + 1);
-                    }),
-                    child: Icon(Icons.chevron_right_rounded,
-                        color: colors.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Day-of-week labels
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-                    .map((d) => Expanded(
-                          child: Center(
-                            child: Text(d,
-                                style: TextStyle(
-                                    color: colors.textMuted,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600)),
-                          ),
-                        ))
-                    .toList(),
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // Calendar grid
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 7,
-                  childAspectRatio: 1,
                 ),
-                itemCount: days.length,
-                itemBuilder: (_, i) {
-                  final day = days[i];
-                  final isCurrentMonth =
-                      day.month == _focusedMonth.month;
-                  final isSelected = day.year == _selectedDay.year &&
-                      day.month == _selectedDay.month &&
-                      day.day == _selectedDay.day;
-                  final isToday = day.year == DateTime.now().year &&
-                      day.month == DateTime.now().month &&
-                      day.day == DateTime.now().day;
-                  final hasTask = tasks.hasTaskOnDay(day);
+                GestureDetector(
+                  onTap: () => setState(() {
+                    _focusedMonth = DateTime(
+                      _focusedMonth.year,
+                      _focusedMonth.month + 1,
+                    );
+                  }),
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
 
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedDay = day),
-                    child: Center(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: isSelected
-                              ? const LinearGradient(colors: [
-                                  AppTheme.accentIndigo,
-                                  AppTheme.accentViolet
-                                ])
-                              : null,
-                          color: isToday && !isSelected
-                              ? AppTheme.accentIndigo.withOpacity(0.1)
-                              : null,
-                          border: isToday && !isSelected
-                              ? Border.all(
-                                  color: AppTheme.accentIndigo.withOpacity(0.4),
-                                  width: 1.5)
-                              : null,
-                        ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Text(
-                              '${day.day}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: isSelected || isToday
-                                    ? FontWeight.w700
-                                    : FontWeight.w400,
-                                color: isSelected
-                                    ? Colors.white
-                                    : isCurrentMonth
-                                        ? colors.textPrimary
-                                        : colors.textMuted,
+          // Day-of-week labels
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                  .map(
+                    (d) => Expanded(
+                      child: Center(
+                        child: Text(
+                          d,
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: colors.textMuted,
+                                fontWeight: FontWeight.w600,
                               ),
-                            ),
-                            if (hasTask && !isSelected)
-                              Positioned(
-                                bottom: 4,
-                                child: Container(
-                                  width: 4,
-                                  height: 4,
-                                  decoration: const BoxDecoration(
-                                    color: AppTheme.accentIndigo,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
-                          ],
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
+                  )
+                  .toList(),
             ),
+          ),
+          const SizedBox(height: 8),
 
-            const Divider(height: 1),
-            const SizedBox(height: 16),
-
-            // Selected day tasks
-            Expanded(
-              child: _SelectedDayTasks(
-                day: _selectedDay,
-                tasks: tasks.tasksForDay(_selectedDay),
-                colors: colors,
+          // Calendar grid
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 7,
+                childAspectRatio: 1,
               ),
+              itemCount: days.length,
+              itemBuilder: (_, i) {
+                final day = days[i];
+                final isCurrentMonth = day.month == _focusedMonth.month;
+                final isSelected =
+                    day.year == _selectedDay.year &&
+                    day.month == _selectedDay.month &&
+                    day.day == _selectedDay.day;
+                final isToday =
+                    day.year == DateTime.now().year &&
+                    day.month == DateTime.now().month &&
+                    day.day == DateTime.now().day;
+                final hasTask = tasks.hasTaskOnDay(day);
+
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedDay = day),
+                  child: Center(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: isSelected
+                            ? const LinearGradient(
+                                colors: [
+                                  AppTheme.accentIndigo,
+                                  AppTheme.accentViolet,
+                                ],
+                              )
+                            : null,
+                        color: isToday && !isSelected
+                            ? AppTheme.accentIndigo.withValues(alpha: 0.1)
+                            : null,
+                        border: isToday && !isSelected
+                            ? Border.all(
+                                color: AppTheme.accentIndigo.withValues(
+                                  alpha: 0.4,
+                                ),
+                                width: 1.5,
+                              )
+                            : null,
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Text(
+                            '${day.day}',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  fontWeight: isSelected || isToday
+                                      ? FontWeight.w700
+                                      : FontWeight.w400,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : isCurrentMonth
+                                      ? colors.textPrimary
+                                      : colors.textMuted,
+                                ),
+                          ),
+                          if (hasTask && !isSelected)
+                            Positioned(
+                              bottom: 4,
+                              child: Container(
+                                width: 4,
+                                height: 4,
+                                decoration: const BoxDecoration(
+                                  color: AppTheme.accentIndigo,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+
+          const Divider(height: 1),
+          const SizedBox(height: 16),
+
+          // Selected day tasks
+          Expanded(
+            child: _SelectedDayTasks(
+              day: _selectedDay,
+              tasks: tasks.allTasks
+                  .where(
+                    (task) =>
+                        task.createdAt.year == _selectedDay.year &&
+                        task.createdAt.month == _selectedDay.month &&
+                        task.createdAt.day == _selectedDay.day,
+                  )
+                  .toList(),
+              colors: colors,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -204,11 +247,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
 class _SelectedDayTasks extends StatelessWidget {
   final DateTime day;
-  final List tasks;
-  final AppColors colors;
+  final List<TaskModel> tasks;
+  final AppThemeData colors;
 
-  const _SelectedDayTasks(
-      {required this.day, required this.tasks, required this.colors});
+  const _SelectedDayTasks({
+    required this.day,
+    required this.tasks,
+    required this.colors,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -220,24 +266,31 @@ class _SelectedDayTasks extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
           child: Row(
             children: [
-              Text(fmt.format(day),
-                  style: TextStyle(
-                      color: colors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15)),
+              Text(
+                fmt.format(day),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: colors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const Spacer(),
               if (tasks.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: AppTheme.accentIndigo.withOpacity(0.1),
+                    color: AppTheme.accentIndigo.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text('${tasks.length} task${tasks.length > 1 ? 's' : ''}',
-                      style: const TextStyle(
-                          color: AppTheme.accentIndigo,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600)),
+                  child: Text(
+                    '${tasks.length} task${tasks.length > 1 ? 's' : ''}',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppTheme.accentIndigo,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
             ],
           ),
@@ -248,11 +301,16 @@ class _SelectedDayTasks extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.event_available_rounded,
-                      size: 40, color: colors.textMuted),
+                  Icon(
+                    Icons.event_available_rounded,
+                    size: 40,
+                    color: colors.textMuted,
+                  ),
                   const SizedBox(height: 10),
-                  Text('No tasks this day',
-                      style: TextStyle(color: colors.textMuted)),
+                  Text(
+                    'No tasks this day',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
                 ],
               ),
             ),
@@ -275,18 +333,23 @@ class _SelectedDayTasks extends StatelessWidget {
                   child: Row(
                     children: [
                       Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                              color: AppTheme.accentIndigo,
-                              shape: BoxShape.circle)),
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.accentIndigo,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Text(t.title,
-                            style: TextStyle(
+                        child: Text(
+                          t.title,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
                                 color: colors.textPrimary,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500)),
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
                       ),
                     ],
                   ),
